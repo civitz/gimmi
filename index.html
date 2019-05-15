@@ -1,0 +1,55 @@
+<html>
+<head>
+    <meta charset="UTF-8"> 
+    <script lang="javascript">
+        var data = []
+        var recorder;
+        function startrecord(){
+            console.log({"Data before": data})
+            while(data.length > 0){
+                data.pop();
+            }
+            console.log({"Data after cleaning": data})
+            recorder.start()
+            recorder.addEventListener("dataavailable", event => {
+                console.log("Saving data...")
+                data.push(event.data);
+                console.log({"Data after saving": data})
+            });
+            console.log({"Recorder started ": recorder})
+        }
+
+        function stoprecord(){
+            console.log("Stop recording")
+            recorder.stop();
+            console.log({"Data after stop": data})
+        }
+
+        function play(){
+            console.log("Playing data")
+            console.log("Data length " + data.length)
+            var audioBlob = new Blob([data[data.length-1]]);
+            var audioUrl = URL.createObjectURL(audioBlob);
+            var audio = new Audio(audioUrl);
+            audio.addEventListener("ended", event => {
+                URL.revokeObjectURL(audioUrl);
+            })
+            audio.play();
+        }
+
+        function setup(){
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    console.log("Setting up recorder");
+                    recorder = new MediaRecorder(stream);
+                });
+        }
+        </script>
+</head>
+<body onload="setup()">
+
+<button onmousedown="startrecord()" onmouseup="stoprecord()">Gimmi</button>
+<button onclick="play()">Ridimmi</button>
+
+</body>
+</html>
